@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | Code Editor</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>Your Saved Codes</h2>
+      <button onclick="location.href='editor.html'">New Code</button>
+    </header>
+    <div id="codeList" class="code-list"></div>
+  </div>
+  <script>
+    async function fetchCodes() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("User not logged in");
+        window.location.href = "login.html";
+        return;
+      }
+      const response = await fetch("http://localhost:3000/api/codes/user", {
+        headers: {
+          "Content-Type": "application/json",
+          "userid": userId
+        }
+      });
+      const data = await response.json();
+      const codeList = document.getElementById("codeList");
+      codeList.innerHTML = "";
+      if (data.codes && data.codes.length > 0) {
+        data.codes.forEach(code => {
+          const codeDiv = document.createElement("div");
+          codeDiv.className = "code-card";
+          codeDiv.innerHTML = `<h3>${code.title}</h3><p>${code.language}</p>`;
+          codeDiv.addEventListener("click", () => {
+            localStorage.setItem("currentCode", JSON.stringify(code));
+            window.location.href = "editor.html";
+          });
+          codeList.appendChild(codeDiv);
+        });
+      } else {
+        codeList.innerHTML = "<p>No codes saved yet.</p>";
+      }
+    }
+    fetchCodes();
+  </script>
+</body>
+</html>
